@@ -6,6 +6,9 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 
+#lock.json
+package-json.json
+
 # test file
 test.js
 
