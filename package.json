@@ -1,0 +1,45 @@
+{
+    "name": "jojo-bot",
+    "version": "1.0.0",
+    "description": "A bot",
+    "main": "index.js",
+    "scripts": {
+        "start": "babel-node main.ts --extensions \".ts\"",
+        "tsc": "tsc"
+    },
+    "author": "Jojofoulk",
+    "license": "ISC",
+    "dependencies": {
+        "acorn": ">=7.1.1",
+        "discord.js": "^11.5.1",
+        "dotenv": "^8.2.0",
+        "google-auth-library": "^5.9.2",
+        "googleapis": "^47.0.0",
+        "jimp": "^0.9.6",
+        "minimist": ">=1.2.2",
+        "moment": "^2.24.0",
+        "node-fetch": "^2.6.0",
+        "opusscript": "0.0.7",
+        "ytdl-core": "^1.0.7"
+    },
+    "devDependencies": {
+        "@babel/cli": "^7.8.4",
+        "@babel/core": "^7.8.4",
+        "@babel/node": "^7.8.4",
+        "@babel/plugin-proposal-class-properties": "^7.8.3",
+        "@babel/plugin-proposal-object-rest-spread": "^7.8.3",
+        "@babel/preset-env": "^7.8.4",
+        "@babel/preset-typescript": "^7.8.3",
+        "@types/node": "^12.12.31",
+        "@typescript-eslint/eslint-plugin": "~2.19.2",
+        "@typescript-eslint/parser": "~2.19.2",
+        "awesome-typescript-loader": "^5.2.1",
+        "eslint": "~6.8.0",
+        "eslint-config-prettier": "~6.10.0",
+        "typescript": "^3.8.2"
+    },
+    "engines": {
+        "npm": ">=6.13.7",
+        "node": ">=12.15.0"
+    }
+}
