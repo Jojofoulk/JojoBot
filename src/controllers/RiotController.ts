@@ -141,10 +141,10 @@ export class RiotController {
     async buildRichEmbed(summoner: RiotSummoner, entries: RiotEntry[], masteries: RiotMastery[], activeGame: any, region: string, summonerName: string): Promise<RichEmbed> {
 
         /** RichEmbed to be returned */
-        let embedMessage: RichEmbed = new RichEmbed() 
+        let embedMessage: RichEmbed = new RichEmbed();
 
         embedMessage                    
-        .setURL(`https://${RIOT_CONSTANTS.OP_GG_DOMAINS[region]}op.gg/summoner/userName=${summonerName}`)
+        .setURL(`https://${RIOT_CONSTANTS.OP_GG_DOMAINS[region.toUpperCase()]}op.gg/summoner/userName=${summonerName}`)
         .setTitle(`${summoner.name} | Level ${summoner.summonerLevel}`)
         .setThumbnail(`http://ddragon.leagueoflegends.com/cdn/${this.ddragonVersion}/img/profileicon/` + summoner.profileIconId + ".png")
         .setTimestamp()  
@@ -160,11 +160,9 @@ export class RiotController {
 
             embedMessage.setImage(`http://stelar7.no/cdragon/latest/splash-art/${searchedSummoner.championId}/0.png`);
             activeGame.gameLength as number;
-            
-            let timeElapsed: string;
 
-
-            timeElapsed = DateHelper.dateTimeToFormattedString(activeGame.gameLength);
+            //adding time diff from specator endpoint in sec (3 min = 180sec)
+            let timeElapsed: string= DateHelper.dateTimeToFormattedString(activeGame.gameLength + 182);
             
             queues.data.find(q=>q.queueId === activeGame.gameQueueConfigId).description.replace(" games", "");
             await this.getChampionByKey(searchedSummoner.championId).then(champ => {
@@ -233,7 +231,7 @@ export class RiotController {
                 throw new Error(`Couldn't get user info. \nThis is probably an issue with the bot <@${DISCORD_CONSTANTS.MY_USER_ID}>`);
             }
             else if (res.status.status_code === 404) {
-                throw new Error("User" + userName + "not found for region **" + region.toUpperCase() + "**");
+                throw new Error("User **" + userName + "** not found for region **" + region.toUpperCase() + "**");
             }
             else {
                 throw new Error("Unkown error. Riot API might be unavailable");
