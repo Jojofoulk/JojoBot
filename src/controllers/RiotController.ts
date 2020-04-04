@@ -1,9 +1,9 @@
 import DiscordUtils from '../utils/DiscordUtils';
 import { Message, RichEmbed } from 'discord.js';
-import { RiotSummoner, RiotEntry, RiotMastery } from '../models/RiotModels';
+import { RiotSummoner, RiotEntry, RiotMastery, MatchListDto, CurrentGameInfo } from '../models/RiotModels';
 import { RIOT_CONSTANTS, DISCORD_CONSTANTS } from '../utils/Constants';
 
-import * as fetch from 'node-fetch';
+import fetch from 'node-fetch';
 import DateHelper from '../utils/DateHelper';
 import moment from 'moment';
 import * as queues from '../utils/league-constants/queues.json';
@@ -93,7 +93,8 @@ export class RiotController {
         let searchedSummoner: RiotSummoner;
         let searchedEntries: RiotEntry[];
         let searchedMasteries: RiotMastery[];
-        let activeGame;
+        let activeGame: CurrentGameInfo;
+        let matchList: MatchListDto;
 
         if (!!region && RIOT_CONSTANTS.ENDPOINT_REGIONS.includes(region.toLocaleUpperCase())) {
             // console.log("test");
@@ -124,8 +125,13 @@ export class RiotController {
                 activeGame = data;
                 return null;
             })
+            .then(_ => this.getAccountLastMatches(searchedSummoner.accountId, region))
+            .then(_matchList => {
+                matchList = _matchList;
+                return null;
+            })
             .then(_ => {
-                return this.buildRichEmbed(searchedSummoner, searchedEntries, searchedMasteries, activeGame, region, searchedSummonerName)
+                return this.buildProfileRichEmbed(searchedSummoner, searchedEntries, searchedMasteries, activeGame, matchList, region, searchedSummonerName)
             })
             // messageEmbed.setThumbnail(`http://stelar7.no/cdragon/latest/profile-icons/${summoner.profileIconId}.jpg`)
         }
@@ -138,7 +144,7 @@ export class RiotController {
     }
 
 
-    async buildRichEmbed(summoner: RiotSummoner, entries: RiotEntry[], masteries: RiotMastery[], activeGame: any, region: string, summonerName: string): Promise<RichEmbed> {
+    async buildProfileRichEmbed(summoner: RiotSummoner, entries: RiotEntry[], masteries: RiotMastery[], activeGame: CurrentGameInfo, matchList: MatchListDto, region: string, summonerName: string): Promise<RichEmbed> {
 
         /** RichEmbed to be returned */
         let embedMessage: RichEmbed = new RichEmbed();
@@ -150,10 +156,11 @@ export class RiotController {
         .setTimestamp()  
         
         //Noy currently in game
-        if (activeGame.status && activeGame.status.status_code === 404) {
-            let lastSeenDate: Date = new Date(summoner.revisionDate);            
+        if (!activeGame) {
+            let lastSeenDate: Date = new Date(matchList.matches[0].timestamp);
+            
             const lastSeenDiff = moment(lastSeenDate).fromNow()
-            embedMessage.setDescription(`:clock4: Last seen: ${lastSeenDiff}`)
+            embedMessage.setDescription(`:clock4: Last game played: ${lastSeenDiff}`)
         }
         else {
             const searchedSummoner = activeGame.participants.find(c=>c.summonerId === summoner.id);
@@ -180,7 +187,7 @@ export class RiotController {
         else {
             entries.forEach(entry => {
                 highestRank = entry.tier;
-                embedMessage.addField("Rank - " + entry.queueType, `${entry.tier} ${entry.rank}`, true);
+                embedMessage.addField("Rank - " + entry.queueType, `${entry.tier} ${entry.rank} (${entry.leaguePoints} LP)`, true);
                 if (entry.queueType === "RANKED_SOLO_5x5")
                     rankColor = RIOT_CONSTANTS.RANK_COLORS[entry.tier];
             })
@@ -223,8 +230,9 @@ export class RiotController {
         })
         .then(data => data.json())
         .then(res => {
+            //Make this whole check routine a function that takes type to return as argument, and maybe error msg (optional), to add it to other fetch like this 
             if (!res.status) {
-                return res;
+                return res as RiotSummoner;
             }
             else if (res.status.status_code === 403) {
                 console.log("Forbidden. Check if API is expired");
@@ -239,6 +247,14 @@ export class RiotController {
         })
     }
 
+    async getAccountLastMatches(accountId: string, region: string): Promise<MatchListDto> {
+        let url = RIOT_CONSTANTS.URL.replace("REGION", region).toLocaleLowerCase() + "match/v4/matchlists/by-account/" + accountId + "?endIndex=9&beginIndex=0";
+        return await fetch(url, {
+            method: "GET",
+            headers: {"X-Riot-Token": process.env.RIOT_API_KEY}
+        })
+        .then(data => data.json())
+    }
 
     async getSummonerLeagueEntries(summonerId: string, region: string): Promise<RiotEntry[]> {
         let url = RIOT_CONSTANTS.URL.replace("REGION", region).toLocaleLowerCase() + "league/v4/entries/by-summoner/" + summonerId;
@@ -258,13 +274,19 @@ export class RiotController {
         .then(data => data.json())
     }
 
-    async getSummonerActiveGame(summonerId: string, region: string) {
+    async getSummonerActiveGame(summonerId: string, region: string): Promise<CurrentGameInfo> {
         let url = RIOT_CONSTANTS.URL.replace("REGION", region).toLocaleLowerCase() + "spectator/v4/active-games/by-summoner/" + summonerId;
         return await fetch(url, {
             method: "GET",
             headers: {"X-Riot-Token": process.env.RIOT_API_KEY}
         })
-        .then(data => data.json())
+        .then(data => {
+            return data.ok ? data.json() : null;
+        })
+        .catch(err => {
+            console.log(err);
+            
+        })
     }
 
 

@@ -1,3 +1,4 @@
+//#region  =================================   SUMMONER   ==========================================
 export class RiotSummoner {
     constructor(){}
     /** Encrypted account ID. Max length 56 characters. */
@@ -15,7 +16,9 @@ export class RiotSummoner {
     /** Summoner level associated with the summoner. */
     summonerLevel: number;
 }
+//#endregion
 
+//#region  =================================   ENTRY (LEAGUE/RANK)   ==========================================
 export class RiotEntry {
     leagueId: string;	
     /** Player's encrypted summonerId. */
@@ -35,7 +38,16 @@ export class RiotEntry {
     inactive: boolean	
     miniSeries: MiniSeriesDTO	;
 }
+class MiniSeriesDTO {
+    losses:	number;
+    progress: string;	
+    target: number;	
+    wins: number;
+}
+//#endregion
 
+
+//#region =================================   MASTERY   ==========================================
 export class RiotMastery {
 	/** Number of points needed to achieve next level. Zero if player reached maximum champion level for this champion. */
     championPointsUntilNextLevel: number;
@@ -56,11 +68,105 @@ export class RiotMastery {
 	/** The token earned for this champion to levelup. */
     tokensEarned: number;
 }
+//#endregion
 
-class MiniSeriesDTO {
-    losses:	number;
-    progress: string;	
-    target: number;	
-    wins: number;
+//#region  =================================   CURRENT GAME INFO   ==========================================
+export class CurrentGameInfo {
+    /** The ID of the game */
+    gameId: number;
+    /** The game type */
+    gameType: string;
+    /** The game start time represented in epoch milliseconds */
+    gameStartTime: number;
+    /** The ID of the map */
+    mapId: number;
+    /** The amount of time in seconds that has passed since the game started */
+    gameLength: number;
+    /** The ID of the platform on which the game is being played */
+    platformId: string;
+    /** The game mode */
+    gameMode: string;
+    /** Banned champion information */
+    bannedChampions: BannedChampion[];
+    /** The queue type (queue types are documented on the Game Constants page) */
+    gameQueueConfigId: number;
+    /** The observer information */
+    observers: Observer;
+    /** The participant information */
+    participants: CurrentGameParticipant[];
 }
 
+class BannedChampion {
+    /** The turn during which the champion was banned */
+    pickTurn: number;
+    /** The ID of the banned champion */
+    championId: number;
+    /** The ID of the team that banned the champion */
+    teamId: number;
+}
+
+class Observer {
+/** Key used to decrypt the spectator grid game data for playback */
+encryptionKey: string;
+}
+
+class CurrentGameParticipant {
+    /** The ID of the champion played by this participant */
+    championId: number;
+    /** Perks/Runes Reforged Information */
+    perks: Perks;
+    /** The ID of the profile icon used by this participant */
+    profileIconId: number;
+    /** Flag indicating whether or not this participant is a bot */
+    bot: boolean;
+    /** The team ID of this participant, indicating the participant's team */
+    teamId: number;
+    /** The summoner name of this participant */
+    summonerName: string;
+    /** The encrypted summoner ID of this participant */
+    summonerId: string;
+    /** The ID of the first summoner spell used by this participant */
+    spell1Id: number;
+    /** The ID of the second summoner spell used by this participant */
+    spell2Id: number;
+    /** List of Game Customizations */
+    gameCustomizationObjects: GameCustomizationObject[];
+}
+
+class Perks {
+    /** IDs of the perks/runes assigned. */
+    perkIds: number[];
+    /** Primary runes path */
+    perkStyle: number;
+    /** Secondary runes pat */
+    perkSubStyle: number;
+}
+
+class GameCustomizationObject {
+    /** Category identifier for Game Customization */
+    category: string;
+    /** Game Customization content */
+    content: string;
+}
+//#endregion
+
+
+//#region  =================================   MATCH LIST   ==========================================
+export class MatchListDto {
+    startIndex: number;	
+    totalGames: number;
+    endIndex: number;	
+    matches: MatchReferenceDto[]
+}
+
+class MatchReferenceDto {
+    gameId: number;
+    role: string;
+    season: number;
+    platformId: string;
+    champion: number;
+    queue: number;
+    lane: string;
+    timestamp: number;
+}
+//#endregion
