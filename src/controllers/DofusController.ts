@@ -2,7 +2,7 @@
 
 import DiscordUtils from '../utils/DiscordUtils';
 import { Message, RichEmbed } from 'discord.js';
-import * as fetch from 'node-fetch';
+import fetch from 'node-fetch';
 
 import * as stringSimilarity from 'string-similarity'
 /** Return an item */
@@ -200,7 +200,7 @@ export class DofusController {
         let statIcon = (() => {
             switch(key) {
                 case "Intelligence":
-                    return ":fire:";
+                    return ":red_circle:";
                 case "Force":
                     return ":brown_circle:"
                 case "Agilité":

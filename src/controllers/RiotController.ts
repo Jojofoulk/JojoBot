@@ -95,6 +95,7 @@ export class RiotController {
         let searchedMasteries: RiotMastery[];
         let activeGame: CurrentGameInfo;
         let matchList: MatchListDto;
+        let winRate: {Wins: number, Defeats: number} = {Wins: 0, Defeats: 0};
 
         if (!!region && RIOT_CONSTANTS.ENDPOINT_REGIONS.includes(region.toLocaleUpperCase())) {
             // console.log("test");
@@ -127,11 +128,22 @@ export class RiotController {
             })
             .then(_ => this.getAccountLastMatches(searchedSummoner.accountId, region))
             .then(_matchList => {
-                matchList = _matchList;
+                matchList = _matchList;                
                 return null;
             })
+            .then(async _ => {
+                await Promise.all(matchList.matches.map(m => this.getMatchDetails(""+m.gameId, region))).then(matchArray => {
+                    
+                    let currentSummonerParticipantArr = matchArray.map(mm=>mm.participantIdentities.find(p => p.player.summonerId === searchedSummoner.id));
+                    // console.log(participants)
+                    for (let i = 0; i < currentSummonerParticipantArr.length; i++) {
+                        let p = matchArray[i].participants.find(matchParticipant => matchParticipant.participantId === currentSummonerParticipantArr[i].participantId);                        
+                        p.stats.win ? winRate.Wins += 1 : winRate.Defeats += 1;
+                    }
+                })
+            })
             .then(_ => {
-                return this.buildProfileRichEmbed(searchedSummoner, searchedEntries, searchedMasteries, activeGame, matchList, region, searchedSummonerName)
+                return this.buildProfileRichEmbed(searchedSummoner, searchedEntries, searchedMasteries, activeGame, matchList, winRate, region, searchedSummonerName)
             })
             // messageEmbed.setThumbnail(`http://stelar7.no/cdragon/latest/profile-icons/${summoner.profileIconId}.jpg`)
         }
@@ -144,7 +156,7 @@ export class RiotController {
     }
 
 
-    async buildProfileRichEmbed(summoner: RiotSummoner, entries: RiotEntry[], masteries: RiotMastery[], activeGame: CurrentGameInfo, matchList: MatchListDto, region: string, summonerName: string): Promise<RichEmbed> {
+    async buildProfileRichEmbed(summoner: RiotSummoner, entries: RiotEntry[], masteries: RiotMastery[], activeGame: CurrentGameInfo, matchList: MatchListDto, winRate: {Wins: number, Defeats: number}, region: string, summonerName: string): Promise<RichEmbed> {
 
         /** RichEmbed to be returned */
         let embedMessage: RichEmbed = new RichEmbed();
@@ -194,6 +206,9 @@ export class RiotController {
         }
         embedMessage.setColor(rankColor || highestRank || RIOT_CONSTANTS.RANK_COLORS.UNRANKED);
         
+        embedMessage.addField("Winrate", `${winRate.Wins}W/${winRate.Defeats}L`, true);
+
+
         if (masteries.length === 0) {
             embedMessage.addField("Best Champion", `No champion masteries available`);
         }
@@ -248,7 +263,16 @@ export class RiotController {
     }
 
     async getAccountLastMatches(accountId: string, region: string): Promise<MatchListDto> {
-        let url = RIOT_CONSTANTS.URL.replace("REGION", region).toLocaleLowerCase() + "match/v4/matchlists/by-account/" + accountId + "?endIndex=9&beginIndex=0";
+        let url = RIOT_CONSTANTS.URL.replace("REGION", region).toLocaleLowerCase() + "match/v4/matchlists/by-account/" + accountId + "?endIndex=10&beginIndex=0";
+        return await fetch(url, {
+            method: "GET",
+            headers: {"X-Riot-Token": process.env.RIOT_API_KEY}
+        })
+        .then(data => data.json())
+    }
+
+    async getMatchDetails(matchId: string, region: string): Promise<any> {
+        let url = RIOT_CONSTANTS.URL.replace("REGION", region).toLocaleLowerCase() + "match/v4/matches/" + matchId;
         return await fetch(url, {
             method: "GET",
             headers: {"X-Riot-Token": process.env.RIOT_API_KEY}
@@ -280,6 +304,7 @@ export class RiotController {
             method: "GET",
             headers: {"X-Riot-Token": process.env.RIOT_API_KEY}
         })
+        //return an error instead? with the error code so the fnct call can use catch()
         .then(data => {
             return data.ok ? data.json() : null;
         })
