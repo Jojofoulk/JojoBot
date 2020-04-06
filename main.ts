@@ -90,6 +90,7 @@ client.on("message", message => {
                 message.channel.send("bah nn dukou");
                 break;
             default:
+                message.channel.send(`Command "${command}" is not recognized`);
                 console.log(`Command "${command}" is not recognized`);
                 break;
         }

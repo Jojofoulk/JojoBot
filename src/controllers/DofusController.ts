@@ -1,9 +1,9 @@
-/** Controller for some dofus api via dofus api fr */
-
+/** Controller for some dofus API via dofus api fr (unofficial API)*/
 import DiscordUtils from '../utils/DiscordUtils';
+
 import { Message, RichEmbed } from 'discord.js';
 import fetch from 'node-fetch';
-
+import child_process from "child_process";
 import * as stringSimilarity from 'string-similarity'
 /** Return an item */
 /** Return a profile (no api yet, might have to crawl the ankama website manually and parse the data somehow) */
@@ -32,8 +32,11 @@ export class DofusController {
                         DiscordUtils.displayText(message, "Malformed embed");
                     });
                 }
-                if (res instanceof Message){
+                else if (res instanceof Message){
                     message.channel.send(res.content);
+                }
+                else {
+                    msg.delete();
                 }
                 msg.delete();
            })
@@ -77,14 +80,23 @@ export class DofusController {
                     }
                     return embed
                 });
+            case "portail":
+            case "portal":
+            case "portails":
+            case "portals":
+            case "dimension":
+            case "dimensions":
+                return await this.fetchPortals().then(data => {
+                    return data
+                });
+                break;
             default:
-                throw new Error(`Function ${args[0]} unknown for command riot`);
+                throw new Error(`Function ${args[0]} unknown for command dofus`);
                 
         }
     }
 
     async searchItem(itemName: string) {
-
 
         let equipment: any;
         let set: any;
@@ -176,7 +188,6 @@ export class DofusController {
         })
     }
 
-
     async fetchSetById(id: number) {
         let url = "https://fr.dofus.dofapi.fr/sets/" + id
         return await fetch(url, {
@@ -186,14 +197,10 @@ export class DofusController {
         .then((res: object) => res)
     }
 
-
-
     formatItemRecipeString(key, object) {
        let recipeString = `${key} x${object[key]["quantity"]}\n`;
        return recipeString;
     }
-
-
     //Maybe put stat object loop here, and custom sort to have certain stat at the top (PA, PM, Vita, Stats, Sagesse, ...)
     formatStatsString(key, object) {
 
@@ -242,6 +249,34 @@ export class DofusController {
        object[key]["max"] +"**]\n";
 
        return _statString;
+    }
+
+    //Todo: add a stdin that feeds which server to look from, right now the value is harcoded in the .py script
+    async fetchPortals(): Promise<RichEmbed> {
+        const file = require.resolve("./../../Scripts/scraping.py");
+        let spawn = child_process.spawn("python",[file]);
+        let embed: RichEmbed = new RichEmbed();
+        embed.setDescription("");
+
+        for await (const portals of spawn.stdout){
+            const data = (""+portals).substring(0, (""+portals).indexOf("\r")-1).split("&");                     
+            data.forEach(portal => {
+                let text = portal.split('|')
+                embed.description += (`**${text[0]}:**  \`${text[1]}\`  (${text[2]} uses left)\n`);
+            });
+        }
+        const exitCode = await new Promise((resolve, reject) => {
+            spawn.on("exit", resolve)
+        });
+
+        if(exitCode) {
+            throw Error("The script to retrieve protals info didn't run successfullt\n Error code: " + exitCode)
+        }
+        else {
+            embed.setTitle("Dimension Portals (Agrid)")
+            .setURL("https://dofus-portals.fr/portails/2")
+            return embed;
+        }        
     }
 }
 
