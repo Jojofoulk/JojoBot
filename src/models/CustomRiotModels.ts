@@ -1,0 +1,1 @@
+export type WinRate = {Wins: number, Defeats: number, Ratio: number};

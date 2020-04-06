@@ -2,11 +2,12 @@ import DiscordUtils from '../utils/DiscordUtils';
 import { Message, RichEmbed } from 'discord.js';
 import { RiotSummoner, RiotEntry, RiotMastery, MatchListDto, CurrentGameInfo } from '../models/RiotModels';
 import { RIOT_CONSTANTS, DISCORD_CONSTANTS } from '../utils/Constants';
+import DateHelper from '../utils/DateHelper';
+import { WinRate } from '../models/CustomRiotModels';
+import * as queues from '../utils/league-constants/queues.json';
 
 import fetch from 'node-fetch';
-import DateHelper from '../utils/DateHelper';
 import moment from 'moment';
-import * as queues from '../utils/league-constants/queues.json';
 
 // http://stelar7.no/cdragon/latest for imgs
 export class RiotController {
@@ -95,7 +96,7 @@ export class RiotController {
         let searchedMasteries: RiotMastery[];
         let activeGame: CurrentGameInfo;
         let matchList: MatchListDto;
-        let winRate: {Wins: number, Defeats: number} = {Wins: 0, Defeats: 0};
+        let winRate: WinRate = {Wins: 0, Defeats: 0, Ratio: 0};
 
         if (!!region && RIOT_CONSTANTS.ENDPOINT_REGIONS.includes(region.toLocaleUpperCase())) {
             // console.log("test");
@@ -140,6 +141,8 @@ export class RiotController {
                         let p = matchArray[i].participants.find(matchParticipant => matchParticipant.participantId === currentSummonerParticipantArr[i].participantId);                        
                         p.stats.win ? winRate.Wins += 1 : winRate.Defeats += 1;
                     }
+                    
+                    winRate.Ratio = +(winRate.Wins/matchArray.length).toFixed(2);
                 })
             })
             .then(_ => {
@@ -151,12 +154,10 @@ export class RiotController {
             /** not implemented, loop through all the region until a player is found */
             throw new Error("Search without region not implemented.");
         }
-        
-        
     }
 
 
-    async buildProfileRichEmbed(summoner: RiotSummoner, entries: RiotEntry[], masteries: RiotMastery[], activeGame: CurrentGameInfo, matchList: MatchListDto, winRate: {Wins: number, Defeats: number}, region: string, summonerName: string): Promise<RichEmbed> {
+    async buildProfileRichEmbed(summoner: RiotSummoner, entries: RiotEntry[], masteries: RiotMastery[], activeGame: CurrentGameInfo, matchList: MatchListDto, winRate: WinRate, region: string, summonerName: string): Promise<RichEmbed> {
 
         /** RichEmbed to be returned */
         let embedMessage: RichEmbed = new RichEmbed();
@@ -181,7 +182,7 @@ export class RiotController {
             activeGame.gameLength as number;
 
             //adding time diff from specator endpoint in sec (3 min = 180sec)
-            let timeElapsed: string= DateHelper.dateTimeToFormattedString(activeGame.gameLength + 182);
+            let timeElapsed: string = DateHelper.dateTimeToFormattedString(activeGame.gameLength + 180);
             
             queues.data.find(q=>q.queueId === activeGame.gameQueueConfigId).description.replace(" games", "");
             await this.getChampionByKey(searchedSummoner.championId).then(champ => {
@@ -206,7 +207,7 @@ export class RiotController {
         }
         embedMessage.setColor(rankColor || highestRank || RIOT_CONSTANTS.RANK_COLORS.UNRANKED);
         
-        embedMessage.addField("Winrate", `${winRate.Wins}W/${winRate.Defeats}L`, true);
+        embedMessage.addField("Winrate", `**${winRate.Ratio * 100}%** (${winRate.Wins}W/${winRate.Defeats}L)`, true);
 
 
         if (masteries.length === 0) {
@@ -237,6 +238,8 @@ export class RiotController {
     }
 
 
+    //All these could be the same fnct with a parameter that's a constant for the url with a sensible name (e.g: SUMMONER_DETAILS) 
+
     async getSummonerDetails(region: string, userName: string): Promise<RiotSummoner> {
         let url = RIOT_CONSTANTS.URL.replace("REGION", region).toLocaleLowerCase() + "summoner/v4/summoners/by-name/" + userName;
         return await fetch(url, {
@@ -262,8 +265,9 @@ export class RiotController {
         })
     }
 
-    async getAccountLastMatches(accountId: string, region: string): Promise<MatchListDto> {
-        let url = RIOT_CONSTANTS.URL.replace("REGION", region).toLocaleLowerCase() + "match/v4/matchlists/by-account/" + accountId + "?endIndex=10&beginIndex=0";
+    async getAccountLastMatches(accountId: string, region: string, beginIndex: number = 0, endIndex: number = 10, championId?: number): Promise<MatchListDto> {
+        let url = RIOT_CONSTANTS.URL.replace("REGION", region).toLocaleLowerCase() + `match/v4/matchlists/by-account/${accountId}?endIndex=${endIndex}&beginIndex=${beginIndex}`;
+        championId ? url += `&championId=${championId}` : '';
         return await fetch(url, {
             method: "GET",
             headers: {"X-Riot-Token": process.env.RIOT_API_KEY}
