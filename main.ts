@@ -57,7 +57,7 @@ client.on("ready", () => {
 
 client.on("message", message => {
     // If it calls the bot
-    if (message.content.startsWith("/")) {
+    if (message.content.startsWith("!")) {
         console.log("Command | " + message.content);
 
         const command: string = message.content
@@ -87,8 +87,19 @@ client.on("message", message => {
                 break;
             case "ban":
             case "kick":
-                message.channel.send("bah nn dukou");
+                message.channel.send("stfu");
                 break;
+            case "roll":
+            case "rand":
+                let result;
+                console.log(args);
+                
+                if (!isNaN(+args[0]))
+                    result = Math.floor(Math.random() * Math.floor(+args[0]));
+                else 
+                    result = Math.random() > 0.5 ? "Yes" : "No"
+                message.channel.send(result);
+                break;    
             default:
                 message.channel.send(`Command "${command}" is not recognized`);
                 console.log(`Command "${command}" is not recognized`);

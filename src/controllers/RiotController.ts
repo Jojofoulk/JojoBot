@@ -162,9 +162,17 @@ export class RiotController {
         /** RichEmbed to be returned */
         let embedMessage: RichEmbed = new RichEmbed();
 
+        let specialName = "";
+        if(summoner.name.toLowerCase() === "jojofoulk") {
+            specialName = "(Jhin God) "
+        }
+        if(summoner.name.toLowerCase() === "dovakinpowa56") {
+            specialName = "(Anivia God) "
+        }
+
         embedMessage                    
         .setURL(`https://${RIOT_CONSTANTS.OP_GG_DOMAINS[region.toUpperCase()]}op.gg/summoner/userName=${summonerName}`)
-        .setTitle(`${summoner.name} | Level ${summoner.summonerLevel}`)
+        .setTitle(`${summoner.name} ${specialName}| Level ${summoner.summonerLevel}`)
         .setThumbnail(`http://ddragon.leagueoflegends.com/cdn/${this.ddragonVersion}/img/profileicon/` + summoner.profileIconId + ".png")
         .setTimestamp()  
         

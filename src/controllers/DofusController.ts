@@ -75,7 +75,6 @@ export class DofusController {
                 return await this.searchItem(itemName).then(embed => {
                     if (embed instanceof RichEmbed) {
                         const formattedName: string = embed.title.split(" |")[0];
-                        //
                         console.log("Successfully retrieved details for item " + formattedName);
                     }
                     return embed
@@ -86,9 +85,7 @@ export class DofusController {
             case "portals":
             case "dimension":
             case "dimensions":
-                return await this.fetchPortals().then(data => {
-                    return data
-                });
+                return await this.fetchPortals().then(data => data);
                 break;
             default:
                 throw new Error(`Function ${args[0]} unknown for command dofus`);
@@ -261,12 +258,13 @@ export class DofusController {
         for await (const portals of spawn.stdout){
             const data = (""+portals).substring(0, (""+portals).indexOf("\r")-1).split("&");                     
             data.forEach(portal => {
-                let text = portal.split('|')
-                embed.description += (`**${text[0]}:**  \`${text[1]}\`  (${text[2]} uses left)\n`);
+                let text = portal.split('|');
+                //if no text[1] (position) then format a bit differently
+                embed.description += (`**${text[0]}:**  ${(text[1] ? `\`${text[1]}\`` : "")}  ${(text[1] ? `(${text[2]} uses left)` : `\`${text[2]}\``)}\n`);
             });
         }
-        const exitCode = await new Promise((resolve, reject) => {
-            spawn.on("exit", resolve)
+        const exitCode = await new Promise((resolve) => {
+            spawn.on("exit", resolve);
         });
 
         if(exitCode) {
@@ -274,7 +272,7 @@ export class DofusController {
         }
         else {
             embed.setTitle("Dimension Portals (Agrid)")
-            .setURL("https://dofus-portals.fr/portails/2")
+            .setURL("https://dofus-portals.fr/portails/2");
             return embed;
         }        
     }

@@ -75,15 +75,15 @@ export class ImageController {
                                 this.previousSentImageMsg = imageMsg as Discord.Message;
                                 this.processingImageMsg.delete()
                             })
-                            .catch(err=>{throw err})
+                            .catch(err=>{this.processingImageMsg.edit("Couldn't process image");throw err})
                         }
                     )
                     .catch(err => {
                         console.log(err);
-                        this.processingImageMsg.edit("Couldn't process image")
+                        this.processingImageMsg.edit("Couldn't process image");
                     })
                     .finally(() => {
-                        this.filePath = ""
+                        this.filePath = "";
                         this.clearImageCache();
                     }) 
                 });
@@ -108,9 +108,14 @@ export class ImageController {
                 return await message.channel.fetchMessages().then(msgs => {
                 console.log("No user attachment or bot attachment in current session, looking at channel's previous bot messages")
                 const firstBotMessagesWithAttchment = msgs.filter(msg => msg.author.bot && msg.attachments.size > 0).first();
-                console.log("FileName: " + firstBotMessagesWithAttchment.attachments.first().filename);
+                // console.log("FileName: " + firstBotMessagesWithAttchment.attachments.first().filename);
                 
                 attachment = !!firstBotMessagesWithAttchment ? this.getImageAttachment(firstBotMessagesWithAttchment) : null;
+
+                if (!attachment) {
+                    const firstMessagesWithAttchment = msgs.filter(msg => msg.attachments.size > 0).first();
+                    attachment = !!firstMessagesWithAttchment ? this.getImageAttachment(firstMessagesWithAttchment) : null;
+                }
                 return attachment;
             })
         }
@@ -132,7 +137,7 @@ export class ImageController {
                     return await this.hueShift(image, value)
                 case "deepfry":
                 case "df":
-                    return await this.deepfry(image)
+                    return await this.deepfry(image);
                 default:
                     throw `No operation '${operation}' exist for this command.`;
             }
