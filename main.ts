@@ -17,12 +17,14 @@ require("dotenv").config();
 const config = process.env;
 
 
-process.on('SIGINT', () => {
-    console.log('Received SIGINT. Press y to exit.');
-});
+// process.on('SIGINT', () => {
+//     console.log('Received SIGINT. Press y to exit.');
+// });
 
-process.on("unhandledRejection", error =>
-    console.error("Uncaught Promise Rejection", error)
+process.on("unhandledRejection", error => {
+    console.error("Uncaught Promise Rejection", error);
+    console.log("Uncaught Promise Rejection: ", error);
+}
 );
 
 //Prepare the log file
