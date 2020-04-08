@@ -1,6 +1,6 @@
 // Get the utils functions
 import DiscordUtils from "../utils/DiscordUtils";
-import Jimp from 'jimp';
+import * as Jimp from 'jimp';
 
 // Get the packages
 import * as Discord from "discord.js";
