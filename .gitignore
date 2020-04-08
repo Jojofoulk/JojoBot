@@ -9,6 +9,9 @@ lerna-debug.log*
 #lock.json
 package-lock.json
 
+#build
+build/
+
 # test file
 test.js
 

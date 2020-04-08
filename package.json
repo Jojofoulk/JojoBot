@@ -6,8 +6,8 @@
     "scripts": {
         "start": "babel-node main.ts --extensions \".ts\"",
         "deploy": "node main.js",
-        "tsc": "tsc",
-        "build": "tsc",
+        "tsc": "tsc --outDir build",
+        "build": "tsc --outDir build",
         "postinstall": "npm run build"
     },
     "author": "Jojofoulk",

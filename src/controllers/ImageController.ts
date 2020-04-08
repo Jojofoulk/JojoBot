@@ -64,7 +64,7 @@ export class ImageController {
                     value = +args[1]
                 }
                
-                let processingTask = message.channel.send("Processing...").then(msg => { 
+                message.channel.send("Processing...").then(msg => { 
                     this.processingImageMsg = msg as Discord.Message
                     this.processImage(args[0], attachment, value)
                     .then(img => {    
