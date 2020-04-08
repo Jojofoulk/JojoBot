@@ -253,6 +253,7 @@ export class DofusController {
         const file = require.resolve("./../../Scripts/scraping.py");
         let spawn = child_process.spawn("python",[file]);
         let embed: RichEmbed = new RichEmbed();
+        spawn.on('error', function( err ){ throw err })
         embed.setDescription("");
 
         for await (const portals of spawn.stdout){
