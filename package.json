@@ -5,7 +5,10 @@
     "main": "index.js",
     "scripts": {
         "start": "babel-node main.ts --extensions \".ts\"",
-        "tsc": "tsc"
+        "deploy": "node main.js",
+        "tsc": "tsc",
+        "build": "tsc",
+        "postinstall": "npm run build"
     },
     "author": "Jojofoulk",
     "license": "ISC",
