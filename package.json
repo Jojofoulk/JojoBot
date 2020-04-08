@@ -4,11 +4,10 @@
     "description": "A bot",
     "main": "index.js",
     "scripts": {
-        "start": "babel-node main.ts --extensions \".ts\"",
-        "deploy": "node .\\build\\main.js",
+        "babel": "babel-node main.ts --extensions \".ts\"",
+        "start": "node .\\build\\main.js",
         "tsc": "tsc --outDir build",
-        "build": "tsc --outDir build",
-        "postinstall": "npm run build"
+        "postinstall": "npm run tsc"
     },
     "author": "Jojofoulk",
     "license": "ISC",
