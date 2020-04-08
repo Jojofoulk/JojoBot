@@ -25,6 +25,7 @@
         "node-fetch": "^2.6.0",
         "opusscript": "0.0.7",
         "string-similarity": "^4.0.1",
+        "tslib": "^1.11.1",
         "ytdl-core": "^1.0.7"
     },
     "devDependencies": {
