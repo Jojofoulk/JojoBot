@@ -56,9 +56,9 @@ export class ImageController {
             //fallback to bot previous msg if the user msg doesn't return an attachment
             
             else {
-                console.log("attachment exists: " + attch.filename);
+                console.log("Attachment exists: " + attch.filename + ` (${(attch.filesize/1024).toFixed(1)} KB)`);
                 
-                attachment = attch
+                attachment = attch;
                 let value: number;
                 if (!!args[1] && !isNaN(+args[1])){
                     value = +args[1]
@@ -126,7 +126,6 @@ export class ImageController {
     
 
     async processImage(operation: string, image: Discord.MessageAttachment, value: number = 90): Promise<any> {
-        console.log(image.filesize);
         if(image.filesize > 2000000){
             throw "File too large to process.";
         }
@@ -166,7 +165,7 @@ export class ImageController {
     async deepfry(image: Discord.MessageAttachment): Promise<any>{
         var pixelValue = Math.floor(Math.random() * 2 + 2)
         return Jimp.read(image.url).then(i => {
-            this.filePath = `${imageCacheDirectory}${image.filename.substring(0, image.filename.lastIndexOf('.'))}_deepfried.${i.getExtension()}`;
+            this.filePath = `${imageCacheDirectory}${image.filename.substring(0, image.filename.lastIndexOf('.'))}_deepfried.${i.getExtension() === "jpeg" ? "jpg" : i.getExtension()}`;
             console.log("File path is " + this.filePath);
             return i
                 .pixelate(pixelValue)

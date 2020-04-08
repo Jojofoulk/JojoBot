@@ -94,8 +94,19 @@ client.on("message", message => {
                 let result;
                 console.log(args);
                 
-                if (!isNaN(+args[0]))
+                if(!isNaN(+args[0]) && !isNaN(+args[1])) {
+                    const min: number = +args[0] < +args[1] ? +args[0] : +args[1];
+                    const max: number = +args[0] > +args[1] ? +args[0] : +args[1];
+                    console.log(min, max);
+                    
+                    result = Math.floor(Math.random() * (max - min + 1) + min);
+                }
+                else if (!isNaN(+args[0])) {
                     result = Math.floor(Math.random() * Math.floor(+args[0]));
+                }
+                else if(args.length > 1) {
+                    result =  args[Math.floor(Math.random() * args.length)];
+                }
                 else 
                     result = Math.random() > 0.5 ? "Yes" : "No"
                 message.channel.send(result);
