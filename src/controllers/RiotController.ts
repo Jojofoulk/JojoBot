@@ -7,7 +7,7 @@ import { WinRate } from '../models/CustomRiotModels';
 import * as queues from '../utils/league-constants/queues.json';
 
 import fetch from 'node-fetch';
-import moment from 'moment';
+import * as moment from 'moment';
 
 // http://stelar7.no/cdragon/latest for imgs
 export class RiotController {
