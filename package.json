@@ -5,7 +5,7 @@
     "main": "index.js",
     "scripts": {
         "babel": "babel-node main.ts --extensions \".ts\"",
-        "start": "node .\\build\\main.js",
+        "start": "node build/main.js",
         "tsc": "tsc --outDir build",
         "postinstall": "npm run tsc"
     },
