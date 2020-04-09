@@ -3,7 +3,7 @@ import DiscordUtils from '../utils/DiscordUtils';
 
 import { Message, RichEmbed } from 'discord.js';
 import fetch from 'node-fetch';
-import child_process from "child_process";
+import * as child_process from "child_process";
 import * as stringSimilarity from 'string-similarity'
 /** Return an item */
 /** Return a profile (no api yet, might have to crawl the ankama website manually and parse the data somehow) */
@@ -250,7 +250,7 @@ export class DofusController {
 
     //Todo: add a stdin that feeds which server to look from, right now the value is harcoded in the .py script
     async fetchPortals(): Promise<RichEmbed> {
-        const file = require.resolve("./../../Scripts/scraping.py");
+        const file = require.resolve("./../scripts/scraping.py");
         let spawn = child_process.spawn("python",[file]);
         let embed: RichEmbed = new RichEmbed();
         spawn.on('error', function( err ){ throw err })

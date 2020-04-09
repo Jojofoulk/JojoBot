@@ -75,12 +75,12 @@ export class ImageController {
                                 this.previousSentImageMsg = imageMsg as Discord.Message;
                                 this.processingImageMsg.delete()
                             })
-                            .catch(err=>{this.processingImageMsg.edit("Couldn't process image");throw err})
+                            .catch(err=>{this.processingImageMsg.edit("Couldn't process image, probably too large");throw err})
                         }
                     )
                     .catch(err => {
                         console.log(err);
-                        this.processingImageMsg.edit("Couldn't process image");
+                        this.processingImageMsg.edit("Couldn't process image, probably too large");
                     })
                     .finally(() => {
                         this.filePath = "";
