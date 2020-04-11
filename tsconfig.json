@@ -17,7 +17,8 @@
         "noImplicitAny": false,
         "noImplicitThis": false,
         "strictNullChecks": false,
-        "resolveJsonModule": true
+        "resolveJsonModule": true,
+        "outDir": "build"
     },
     "include": ["src/**/*", "main.ts"]
 }

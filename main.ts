@@ -27,6 +27,12 @@ process.on("unhandledRejection", error => {
 }
 );
 
+process.on("uncaughtException", error => {
+    console.error("uncaughtException", error);
+    console.log("uncaughtException: ", error);
+}
+);
+
 //Prepare the log file
 // const log_file: fs.WriteStream = fs.createWriteStream(
 //     __dirname + "/logs/debug-" + Date.now() + ".log",
@@ -49,6 +55,11 @@ console.log = function(d) {
 
 client.on("disconnect", () => {
     console.log(`Disconnecting ${client.user.tag}!`)
+});
+
+process.on('SIGINT', _ => {
+    console.log(`Process ${process.pid} has been interrupted`)
+    process.exit(0)
 })
 
 client.on("ready", () => {
